@@ -1,1 +1,1 @@
-Refer to respective folders for assignments
+Refer to the openapi_specs file to have info on APIs. Use the provided yaml file at https://editor.swagger.io/
