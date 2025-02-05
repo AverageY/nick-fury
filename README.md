@@ -1,1 +1,3 @@
 Refer to the openapi_specs file to have info on APIs. Use the provided yaml file at https://editor.swagger.io/
+
+The effdog spec.txt further details on api implementation 

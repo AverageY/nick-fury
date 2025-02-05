@@ -1,0 +1,299 @@
+﻿client root
+1. get /client : List operation, gives all client
+         response schema(List<Client>)
+        200: [{“ClientId”:”1”,“Name”:”Yash”,Email:”yash@gmail.com”,”CreatedAt”:”iso 8601 time”},...}]
+        -Includes response body schema for 4xx and 5xx error codes
+        
+2. post /client: creates a new client
+request schema(ClientDto) : {“name”:”Yash”,Email:”yash@gmail.com”,”Password”:”pass”}
+response schema:
+201: includes a custom schema(ApiResponse) for account creation with {status:completed, message:account created}
+- includes response for 4xx and 5xx (uses ApiResponse)
+
+
+3. get /client/{clientId}: fetches client by id
+params: clientId
+response schema(Client):{“ClientId”:”1”,“name”:”Yash”,Email:”yash@gmail.com”,”CreatedAt”:”iso 8601 time”}
+-response for client doesnt exist
+-includes response for 4xx and 5xx (uses ApiResponse)
+
+
+4. put /client/{clientId}: updates a client
+params: clientId
+request schema(ClientUpdateDto):
+{“name”:”Yash”,Email:”yash@gmail.com”,”OldPassword”:”pass”,”NewPassword”:”NewPass”} —none of the fields are set as required here since we dont know what user will update
+response schema: uses the ApiResponse schema with status and message:client updated
+-response for client doesnt exist
+-includes response for 4xx and 5xx (uses ApiResponse)
+
+
+5. delete /client/{clientId}:
+params:ClientId
+response : Deleted successfully
+-response for client doesnt exist and 4xx 5xx errors
+
+
+auth root
+1. post /auth : Login route for both client and therapist
+request(LoginDto) : {“Email”:”yash@gmail.com”, “Password”:”pass”}
+        -includes response for 4xx,5xx
+
+
+therapist root
+1. get /therapist : List operation, gives all therapist 
+         response schema(List<Therapist >)
+        200: [{“TherapisttId”:”1”,“Name”:”Piyush”,Email:”piyush@gmail.com”,”Speciality”:”mind”,”CreatedAt”:”iso 8601 time”},...}]
+        -Includes response body schema for 4xx and 5xx error codes
+2. post /therapist: creates a new therapist
+request schema(TherapistDto) : {“name”:”Piyush”,Email:”Piyush@gmail.com”,”Speciality”:”mind”,,”Password”:”pass”}
+response schema:
+201: includes a custom schema(ApiResponse) for account creation with {status:completed, message:account created}
+- includes response for 4xx and 5xx (uses ApiResponse)
+
+
+3. get /therapist/{therapistId}: fetches client by id
+params: TherapistId
+response schema(therapist):{TherapistId”:”1”,“name”:”Piyush”,Email:”piyush@gmail.com”,”Speciality”:”mind”,”CreatedAt”:”iso 8601 time”}
+-response for therapist doesnt exist error
+-includes response for 4xx and 5xx (uses ApiResponse)
+
+
+4. put  /therapist/{therapistId}: updates a therapist
+params: therapistId
+request schema(TherapistUpdateDto):
+{“name”:”Yash”,Email:”yash@gmail.com”,”OldPassword”:”pass”,”NewPassword”:”NewPass”} —none of the fields are set as required here since we dont know what user will update
+response schema: uses the ApiResponse schema with status and message:client updated
+-response for therapist doesnt exist error
+-includes response for 4xx and 5xx (uses ApiResponse)
+
+
+5. delete  /therapist/{therapistId}:
+params:therapistId
+response : Deleted successfully
+-response for client doesnt exist and 4xx 5xx errors
+
+
+root message:
+1. post at /message/{clientId}/{therapistId}:
+params: clientId , therapistId
+request schema(MessageDto) :
+{
+“Content”:”message content here”,
+“Sender”:”sender name”}
+comments - The message Id will be clientId#therapistId so we can retrieve all the messages of a conversation between a client and therapist
+sender name - we can retrieve that through the sender id, checking the id in client/therapist table
+We plan to use the partition key as MessageId and Timestamp as range key to get message in sorted order
+response: Api Schema for 201
+-Error responses for 3xx,4xx,5xx(client,therapist etc not found)
+
+
+2. get at  /message/{clientId}/{therapistId}:
+params: clientId , therapistId
+request schema(MessageViewDto) :
+{“Timestamp”:”date in iso8601”,
+“Content”:”message content here”,
+“Sender”:”sender name”}
+
+
+root journal
+1. post at journal/client/{clientId}:
+params: clientId
+requestSchema(JournalDto):
+{“ExpressedEmotion”: “ I was feeling elated”}
+response schema 201(JournalViewDto):{
+“Timestamp”: “iso 8601 date format”,
+“ExpressedEmotion”:” I was feeling elated”
+        “Feeling” : “Happy”,
+“Intensity”:”High”
+}
+-Error responses for 3xx,4xx,5xx(client not found etc)
+
+2. get at journal/client/{clientId} : get all journals
+
+
+params: clientId
+response schema 200(List<JournalViewDto>):
+[ {
+“Timestamp”: “iso 8601 date format”,
+“ExpressedEmotion”:” I was feeling elated”
+        “Feeling” : “Happy”,
+“Intensity”:”High”
+},....]
+-Error responses for 3xx,4xx,5xx(client not found, unauthorized to get journals etc)
+comments - can be used by therapist also if they have access
+
+
+3. post at journal/accessrequest/{therapistId}/{clientId}:send an access request from therapist to client
+params : clientId, therapistId
+
+
+response:ApiResponse  with Message : access request sent
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+4. get at journal/requests/{clientId} - show all journal requests(pending/approved/rejected}
+params:clientId
+response schema(List<JournalRequestDto>):{
+“TherapistId” :”id”,
+“Status”:”PENDING”
+}
+-Error responses for 3xx,4xx,5xx(client not found etc)
+5. patch at journal/grant/{therapistId}/{clientId}- grants access of journal to therapist
+params : clientId, therapistId
+request : {“action” : “approve/reject/remove’}
+response schema(JournalRequestDto):
+{ “TherapistId” :”id”,
+“Status”:”APPROVED/REJECTED/REMOVED”
+}
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+comments - This info will be saved in the client therapist mapping table with a tag HAS_JOURNAL_ACCESS among others in mapping type
+
+root search
+1. post at search/{clientId}/{therapistId} : Find keywords among therapist notes and client journals:
+params: clientId
+request : {“search” : “depression”}
+response : List<String>
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+2. get search/therapist?name=Piyush or get search/therapist?speciality=mind
+query param : name,speciality
+response(List<TherapistSearchDto>) : {
+“Name” : “Piyush”,
+“Speciality” : “mind”}
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+root Mapping
+1. get at mapping/{clientId}/{therapistId}:to view the mapping
+params : clientId,therapistId
+
+
+response schema(MappingDTO):
+{ “Relation” : [“MAPPED”,”MESSAGED”,”JOURNAL_ACCESS”],
+“JournalAccess”:”APPROVED”,
+“MappingStatus”:”APPROVED”
+}
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+2. post at mapping/{clientId}/{therapistId}:
+params : clientId, therapistId
+response : ApiSchema with message: mapping request sent
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+3. DELETE /mapping/{clientId}/{therapistId}
+params : clientId, therapistId
+response 204 : ApiSchema with message: mapping deleted
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+4. get at mapping/client/ : to see mapping requests
+response schema(List<MappingRequestDto>):
+{
+“TherapistId” :”id”,
+“Status”:”APPROVED/REJECTED”
+}
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+5. patch at mapping/client/{clientId}/therapist/{therapistId} : accept/reject mapping request
+params : clientId, therapistId
+request : {“action” : “approve/reject’}
+response schema(MappingDTO):
+{ “Relation” : [“MAPPED”,”MESSAGED”,”JOURNAL_ACCESS”],
+“JournalAccess”:”APPROVED”,
+“MappingStatus”:”APPROVED”
+}
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+
+6. get at mapping/relation/client/{clientId} : returns all therapist associated to client in any way
+params ; clientId
+response schema(List<RelatedTherapistDto>):{
+“TherapistId” : “id”,
+ “Relation” : [“MAPPED”,”MESSAGED”,”JOURNAL_ACCESS”] }
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+7. get at mapping/relation/therapist/{therapistId} : returns all clients associated to therapist in any way
+params ; clientId
+response schema(List<RelatedClientDto>):{
+“ClientId” : “id”,
+ “Relation” : [“MAPPED”,”MESSAGED”,”JOURNAL_ACCESS”] }
+-Error responses for 3xx,4xx,5xx(therapist/client not found etc)
+
+root session:
+
+
+1. post at session/therapist/{therapistId}: creates a session
+params : therapistId
+request schema(SessionCreateDto): {
+“Name” : “ Therapist Name” ,
+“Date” :”date”,
+StartTime: “time in iso”,
+EndTime: “ time in iso”
+}
+
+
+response schema(SessionViewDto) on 201 status:
+{
+“SessionId” : “id”,
+“Name” : “ Therapist Name” ,
+“Date” :”date”,
+StartTime: “time in iso”,
+EndTime: “ time in iso”,
+“ClientId” : “”,
+PrivateNotes:[],
+SharedNotes: []“
+}
+-Error for 3xx,4xx,5xx
+
+
+2. get at  session/therapist/{therapistId}; gets available sessions of a therapist
+params : therapistId
+ response schema  on 200 : List<SessionCreateDto>
+-Error for 3xx,4xx,5xx
+
+
+3. post at session/appointment/{sessionId}/{clientId}: creates an appointment
+params : sessionId,clientId
+response schema ; ApiResponse with message : appointment lodged
+-Error for 3xx,4xx,5xx
+
+
+
+
+4. patch at session/therapist/{sessionId}/{clientId}: therapist can approve or reject appointment
+params : sessionId,clientId
+request : {“action”:”approve”}
+response schema(SessionViewDto):
+{
+“SessionId” : “sessionId”,
+“Name” : “ Therapist Name” ,
+“Date” :”date”,
+StartTime: “time in iso”,
+EndTime: “ time in iso”,
+“ClientId” : “clientId”,
+PrivateNotes:[],
+SharedNotes: []
+}
+-Error for 3xx,4xx,5xx
+
+
+5. patch at session/{sessionId}: update session details
+params : sessionId
+request schema(SessionUpdateDto): 
+{
+“Date”  : “New date”
+“PrivateNotes”:”Hello1”,
+“SharedNotes:”Hello2”
+}
+response schema(SessionViewDto) : 
+{
+“SessionId” : “sessionId”,
+“Name” : “ Therapist Name” ,
+“Date” :” New date”,
+StartTime: “time in iso”,
+EndTime: “ time in iso”,
+“ClientId” : “clientId”,
+“PrivateNotes”:”Hello1”,
+“SharedNotes:”Hello2”
+}

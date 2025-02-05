@@ -1,0 +1,1000 @@
+openapi: 3.0.0
+info:
+  title: Therapy API
+  version: "1.1.0"
+servers:
+  - url: http://api.example.com
+paths:
+  # ---------------------------
+  # Client Endpoints
+  # ---------------------------
+  /client:
+    get:
+      tags:
+        - Client
+      summary: List all clients
+      responses:
+        '200':
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags:
+        - Client
+      summary: Create a new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientDto'
+      responses:
+        '201':
+          description: Client account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /client/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Client
+      summary: Fetch client by id
+      responses:
+        '200':
+          description: Client details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags:
+        - Client
+      summary: Update a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateDto'
+      responses:
+        '200':
+          description: Client updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Client
+      summary: Delete a client
+      responses:
+        '204':
+          description: Client deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Auth Endpoint
+  # ---------------------------
+  /auth:
+    post:
+      tags:
+        - Auth
+      summary: Login route for both client and therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Therapist Endpoints
+  # ---------------------------
+  /therapist:
+    get:
+      tags:
+        - Therapist
+      summary: List all therapists
+      responses:
+        '200':
+          description: List of therapists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Therapist'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags:
+        - Therapist
+      summary: Create a new therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TherapistDto'
+      responses:
+        '201':
+          description: Therapist account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /therapist/{therapistId}:
+    parameters:
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Therapist
+      summary: Fetch therapist by id
+      responses:
+        '200':
+          description: Therapist details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Therapist'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags:
+        - Therapist
+      summary: Update a therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TherapistUpdateDto'
+      responses:
+        '200':
+          description: Therapist updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Therapist
+      summary: Delete a therapist
+      responses:
+        '204':
+          description: Therapist deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Message Endpoints
+  # ---------------------------
+  /message/{clientId}/{therapistId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Message
+      summary: Send a message between client and therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageDto'
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags:
+        - Message
+      summary: Get conversation between client and therapist
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Journal Endpoints
+  # ---------------------------
+  /journal/client/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Journal
+      summary: Create a journal entry for a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalDto'
+      responses:
+        '201':
+          description: Journal entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags:
+        - Journal
+      summary: Get all journal entries for a client
+      responses:
+        '200':
+          description: List of journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JournalViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /journal/accessrequest/{therapistId}/{clientId}:
+    parameters:
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Journal
+      summary: Send journal access request from therapist to client
+      responses:
+        '200':
+          description: Access request sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /journal/requests/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Journal
+      summary: Get all journal access requests for a client
+      responses:
+        '200':
+          description: List of journal access requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JournalRequestDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /journal/grant/{therapistId}/{clientId}:
+    parameters:
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+        - Journal
+      summary: Grant, reject, or remove journal access for a therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [approve, reject, remove]
+      responses:
+        '200':
+          description: Journal access updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalRequestDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Search Endpoints
+  # ---------------------------
+  /search/{clientId}/{therapistId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Search
+      summary: Keyword search among therapist notes and client journals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search:
+                  type: string
+      responses:
+        '200':
+          description: List of search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /search/therapist:
+    get:
+      tags:
+        - Search
+      summary: Search therapists by name or speciality
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: speciality
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of matching therapists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TherapistSearchDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Mapping Endpoints
+  # ---------------------------
+  /mapping/{clientId}/{therapistId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Mapping
+      summary: Get mapping between a client and a therapist
+      responses:
+        '200':
+          description: Mapping details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingDTO'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags:
+        - Mapping
+      summary: Create a mapping request between a client and a therapist
+      responses:
+        '200':
+          description: Mapping request sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      tags:
+        - Mapping
+      summary: Delete a mapping between a client and a therapist
+      responses:
+        '204':
+          description: Mapping deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /mapping/client:
+    get:
+      tags:
+        - Mapping
+      summary: Get all mapping requests for a client
+      responses:
+        '200':
+          description: List of mapping requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MappingRequestDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /mapping/client/{clientId}/therapist/{therapistId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+        - Mapping
+      summary: Accept or reject a mapping request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [approve, reject]
+      responses:
+        '200':
+          description: Mapping updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingDTO'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /mapping/relation/client/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Mapping
+      summary: Get all therapists associated with a client
+      responses:
+        '200':
+          description: List of related therapists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RelatedTherapistDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /mapping/relation/therapist/{therapistId}:
+    parameters:
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Mapping
+      summary: Get all clients associated with a therapist
+      responses:
+        '200':
+          description: List of related clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RelatedClientDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  # ---------------------------
+  # Session Endpoints
+  # ---------------------------
+  /session/therapist/{therapistId}:
+    parameters:
+      - name: therapistId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Session
+      summary: Create a session by therapist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionCreateDto'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags:
+        - Session
+      summary: Get available sessions of a therapist
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionCreateDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /session/appointment/{sessionId}/{clientId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Session
+      summary: Lodge an appointment for a session
+      responses:
+        '200':
+          description: Appointment lodged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /session/therapist/{sessionId}/{clientId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: clientId
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+        - Session
+      summary: Approve a client appointment for a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [approve]
+      responses:
+        '200':
+          description: Session updated with client appointment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /session/{sessionId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+        - Session
+      summary: Update session details and notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionUpdateDto'
+      responses:
+        '200':
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionViewDto'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+# ---------------------------
+# Components: Schemas and Responses
+# ---------------------------
+components:
+  schemas:
+    Client:
+      type: object
+      properties:
+        ClientId:
+          type: string
+        Name:
+          type: string
+        Email:
+          type: string
+        CreatedAt:
+          type: string
+          format: date-time
+    ClientDto:
+      type: object
+      required:
+        - name
+        - Email
+        - Password
+      properties:
+        name:
+          type: string
+        Email:
+          type: string
+        Password:
+          type: string
+    ClientUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        Email:
+          type: string
+        OldPassword:
+          type: string
+        NewPassword:
+          type: string
+    Therapist:
+      type: object
+      properties:
+        TherapistId:
+          type: string
+        Name:
+          type: string
+        Email:
+          type: string
+        Speciality:
+          type: string
+        CreatedAt:
+          type: string
+          format: date-time
+    TherapistDto:
+      type: object
+      required:
+        - name
+        - Email
+        - Speciality
+        - Password
+      properties:
+        name:
+          type: string
+        Email:
+          type: string
+        Speciality:
+          type: string
+        Password:
+          type: string
+    TherapistUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        Email:
+          type: string
+        OldPassword:
+          type: string
+        NewPassword:
+          type: string
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+          
+    Errorcomp:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+        
+    LoginDto:
+      type: object
+      required:
+        - Email
+        - Password
+      properties:
+        Email:
+          type: string
+        Password:
+          type: string
+    MessageDto:
+      type: object
+      required:
+        - Content
+        - Sender
+      properties:
+        Content:
+          type: string
+        Sender:
+          type: string
+    MessageViewDto:
+      type: object
+      properties:
+        Timestamp:
+          type: string
+          format: date-time
+        Content:
+          type: string
+        Sender:
+          type: string
+    JournalDto:
+      type: object
+      required:
+        - ExpressedEmotion
+      properties:
+        ExpressedEmotion:
+          type: string
+    JournalViewDto:
+      type: object
+      properties:
+        Timestamp:
+          type: string
+          format: date-time
+        ExpressedEmotion:
+          type: string
+        Feeling:
+          type: string
+        Intensity:
+          type: string
+    JournalRequestDto:
+      type: object
+      properties:
+        TherapistId:
+          type: string
+        Status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED, REMOVED]
+    TherapistSearchDto:
+      type: object
+      properties:
+        Name:
+          type: string
+        Speciality:
+          type: string
+    MappingDTO:
+      type: object
+      properties:
+        Relation:
+          type: array
+          items:
+            type: string
+            enum: [MAPPED, MESSAGED, JOURNAL_ACCESS]
+        JournalAccess:
+          type: string
+          enum: [APPROVED, REJECTED, REMOVED]
+        MappingStatus:
+          type: string
+          enum: [APPROVED, PENDING, REJECTED]
+    MappingRequestDto:
+      type: object
+      properties:
+        TherapistId:
+          type: string
+        Status:
+          type: string
+          enum: [APPROVED, REJECTED]
+    RelatedTherapistDto:
+      type: object
+      properties:
+        TherapistId:
+          type: string
+        Relation:
+          type: array
+          items:
+            type: string
+            enum: [MAPPED, MESSAGED, JOURNAL_ACCESS]
+    RelatedClientDto:
+      type: object
+      properties:
+        ClientId:
+          type: string
+        Relation:
+          type: array
+          items:
+            type: string
+            enum: [MAPPED, MESSAGED, JOURNAL_ACCESS]
+    SessionCreateDto:
+      type: object
+      required:
+        - Name
+        - Date
+        - StartTime
+        - EndTime
+      properties:
+        Name:
+          type: string
+        Date:
+          type: string
+        StartTime:
+          type: string
+          format: date-time
+        EndTime:
+          type: string
+          format: date-time
+    SessionViewDto:
+      type: object
+      properties:
+        SessionId:
+          type: string
+        Name:
+          type: string
+        Date:
+          type: string
+        StartTime:
+          type: string
+          format: date-time
+        EndTime:
+          type: string
+          format: date-time
+        ClientId:
+          type: string
+        PrivateNotes:
+          type: array
+          items:
+            type: string
+        SharedNotes:
+          type: array
+          items:
+            type: string
+    SessionUpdateDto:
+      type: object
+      properties:
+        Date:
+          type: string
+        PrivateNotes:
+          type: string
+        SharedNotes:
+          type: string
+    
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errorcomp'
